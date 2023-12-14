@@ -1,0 +1,344 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% load wagtailcore_tags wagtailimages_tags %}
+{% load mechweb_tags %}
+
+
+
+
+
+{% block body_class %}template-staff-homepage{% endblock %}
+
+{% block extra_css %}
+<style>
+td a{
+    text-decoration:underline;
+}
+.nav-pills .nav-item{
+    margin: 1% 1%;
+    background:#caf0f8;
+}
+.nav-pills .nav-item .active{
+    background:#03045e;
+}
+</style>
+
+{% endblock extra_css %}
+
+
+
+{% block content %}
+
+{% get_media_prefix as MEDIA_URL %}
+      <div class="container-fluid">
+          <div class="row">
+              <div class="col-md-12 text-center">
+                  <p>{{ page.intro|richtext }}</p>
+              </div>
+          </div>
+      </div>
+{% comment %} <div class="p-5 m-5">
+<ul>
+{% for staff in project_staff %}
+    <li>{{staff.title}}</li>
+{% endfor %}
+</ul>
+</div> {% endcomment %}
+
+
+<ul class="nav nav-pills flex-column flex-sm-row mb-3 text-center" id="pills-tab" role="tablist">
+  <li class="nav-item flex-sm-fill" role="presentation">
+    <a class="nav-link active" id="pills-tech-officers-tab" data-toggle="pill" href="#pills-tech-officers" role="tab" aria-controls="pills-tech-officers" aria-selected="true">Technical Officer</a>
+  </li>
+  <li class="nav-item flex-sm-fill" role="presentation">
+    <a class="nav-link" id="pills-staff-tab" data-toggle="pill" href="#pills-staff" role="tab" aria-controls="pills-staff" aria-selected="false">Staff</a>
+  </li>
+  <li class="nav-item flex-sm-fill" role="presentation">
+    <a class="nav-link" id="pills-post-docs-tab" data-toggle="pill" href="#pills-post-docs" role="tab" aria-controls="pills-post-docs" aria-selected="false">Post Docs</a>
+  </li>
+<li class="nav-item flex-sm-fill" role="presentation">
+    <a class="nav-link" id="pills-projectstaff-tab" data-toggle="pill" href="#pills-projectstaff" role="tab" aria-controls="pills-projectstaff" aria-selected="false">Project Staff</a>
+  </li>
+</ul>
+<hr>
+<div class="tab-content container-fluid" id="pills-tabContent">
+
+  <div class="tab-pane fade active show" id="pills-tech-officers" role="tabpanel" aria-labelledby="pills-tech-officers-tab">
+    <div class="row bread-list d-flex justify-content-center" >
+    {% for staff in staff_list %}
+    {% with staff.specific.designation|add:0 as staff_type  %}
+            
+
+        {% if staff_type >= 9 and staff_type <= 13 or staff_type == 16 %}
+        <div class="col-sm-11 col-md-5 bread-list-item">
+                        <div class="row">
+                            <div class="col-xs-4 col-sm-4 image">
+                                <a href="{% pageurl staff %}">
+                                {% if staff.specific.photo %}
+                                    {% image staff.specific.photo original style='width:100%; height:100%;'%}
+                                {% else %}
+                                    {% with MEDIA_URL|add:'images/staff/'|add:staff.slug|add:'.jpg' as image_static %}
+                                    <img src="{{ image_static }}" style='width:100%; height:100%;' alt="{{ staff.title}}" class="" />
+                                    {% endwith %}
+                                {% endif %}
+
+                                </a>
+                            </div>
+                            <div class="col-xs-8 col-sm-8">
+                                <a href="{% pageurl staff %}">
+                                    <h2>{{ staff }}</h2>
+                                </a>
+                                <ul class="bread-meta">
+                                    <li><strong>{{ staff.specific.get_designation_display }}</strong></li>
+                                    {% if staff.specific.address %}
+                                        <li><span>Office</span>{{ staff.specific.address }}</li>
+                                    {% endif %}
+                                    {% if staff.specific.email_id %}
+                                        <li><span>Email : </span>{{ staff.specific.email_id|noscrape|safe }}</li>
+                                    {% endif %}
+                                    {% if staff.specific.contact_number %}
+                                        <li><span>Contact</span>{{ staff.specific.contact_number }}</li>
+                                    {% endif %}
+
+                                </ul>
+                            </div>
+                        </div>
+        </div>
+        {% endif %}
+    {% endwith %}
+    {% endfor %}
+    </div>
+  </div>
+
+  <div class="tab-pane fade" id="pills-staff" role="tabpanel" aria-labelledby="pills-staff-tab">
+    <div class="row bread-list d-flex justify-content-center" >
+        {% for staff in staff_list %}
+        {% with staff.specific.designation|add:0 as staff_type  %}
+            {% if staff_type == 15 or staff_type >= 0 and staff_type <= 8 %}
+
+            <div class="col-sm-11 col-md-5 bread-list-item">
+                            <div class="row">
+                                <div class="col-xs-4 col-sm-4 image">
+                                    <a href="{% pageurl staff %}">
+                                    {% if staff.specific.photo %}
+                                        {% image staff.specific.photo original style='width:100%; height:100%;'%}
+                                    {% else %}
+                                        {% with MEDIA_URL|add:'images/staff/'|add:staff.slug|add:'.jpg' as image_static %}
+                                        <img src="{{ image_static }}" style='width:100%; height:100%;' alt="{{ staff.title}}" class="" />
+                                        {% endwith %}
+                                    {% endif %}
+
+                                    </a>
+                                </div>
+                                <div class="col-xs-8 col-sm-8">
+                                    <a href="{% pageurl staff %}">
+                                        <h2>{{ staff }}</h2>
+                                    </a>
+                                    <ul class="bread-meta">
+                                        <li><strong>{{ staff.specific.get_designation_display }}</strong></li>
+                                        {% if staff.specific.address %}
+                                            <li><span>Office</span>{{ staff.specific.address }}</li>
+                                        {% endif %}
+                                        {% if staff.specific.email_id %}
+                                            <li><span>Email : </span>{{ staff.specific.email_id|noscrape|safe }}</li>
+                                        {% endif %}
+                                        {% if staff.specific.contact_number %}
+                                            <li><span>Contact</span>{{ staff.specific.contact_number }}</li>
+                                        {% endif %}
+
+                                    </ul>
+                                </div>
+                            </div>
+            </div>
+            {% endif %}
+        {%endwith%}
+        {% endfor %}
+    </div>
+  </div>
+  
+
+    <div class="tab-pane fade" id="pills-post-docs" role="tabpanel" aria-labelledby="pills-post-docs-tab">
+    <div class="row bread-list d-flex justify-content-center" >
+        {% for staff in staff_list %}
+        {% with staff.specific.designation|add:0 as staff_type  %}
+            {% if staff_type == 14 %}
+
+            <div class="col-sm-11 col-md-5 bread-list-item">
+                            <div class="row">
+                                <div class="col-xs-4 col-sm-4 image">
+                                    <a href="{% pageurl staff %}">
+                                    {% if staff.specific.photo %}
+                                        {% image staff.specific.photo original style='width:100%; height:100%;'%}
+                                    {% else %}
+                                        {% with MEDIA_URL|add:'images/staff/'|add:staff.slug|add:'.jpg' as image_static %}
+                                        <img src="{{ image_static }}" style='width:100%; height:100%;' alt="{{ staff.title}}" class="" />
+                                        {% endwith %}
+                                    {% endif %}
+
+                                    </a>
+                                </div>
+                                <div class="col-xs-8 col-sm-8">
+                                    <a href="{% pageurl staff %}">
+                                        <h2>{{ staff }}</h2>
+                                    </a>
+                                    <ul class="bread-meta">
+                                        <li><strong>{{ staff.specific.get_designation_display }}</strong></li>
+                                        {% if staff.specific.address %}
+                                            <li><span>Office</span>{{ staff.specific.address }}</li>
+                                        {% endif %}
+                                        {% if staff.specific.email_id %}
+                                            <li><span>Email : </span>{{ staff.specific.email_id|noscrape|safe }}</li>
+                                        {% endif %}
+                                        {% if staff.specific.contact_number %}
+                                            <li><span>Contact</span>{{ staff.specific.contact_number }}</li>
+                                        {% endif %}
+
+                                    </ul>
+                                </div>
+                            </div>
+            </div>
+            {% endif %}
+        {%endwith%}
+        {% endfor %}
+    </div>
+  </div>
+  <div class="tab-pane fade" id="pills-projectstaff" role="tabpanel" aria-labelledby="pills-projectstaff-tab">
+    <div class="row bread-list d-flex justify-content-center" >
+{% if project_staff.count %}
+<div class="table-responsive col-sm-12 col-md-10 col-lg-8">
+
+<table class="table table-striped table-hover" style="overflow-x:scroll;">
+    <thead style="background-color:#0077b6;color:white">
+        <tr>
+            <th scope="col">S. No.</th>
+            <th scope="col">Name</th>
+            <th scope="col">Email</th>
+            <th scope="col">Associate Faculty</th>
+            <th scope="col">Project title</th>
+            
+        </tr>
+    </thead>
+    <tbody>
+        {% for staff in project_staff %}
+        <tr>
+
+            <td>{{ forloop.counter }}.</td>
+            <td>{{ staff.specific.full_name }}</td>
+            <td> {%if staff.specific.email%}{{staff.specific.email|noscrape|safe}}{%endif%}</td>
+            <td><a href="{{staff.specific.associate_faculty.url}}">{{staff.specific.associate_faculty}}</a>
+            <td>{{staff.specific.project_title}}</td>
+
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>    
+</div>
+<br><br>
+</div>
+{%endif%}
+<br><br>
+
+    </div>
+  </div>
+
+</div>
+
+
+
+
+
+
+
+{% endblock content %}
+
+
+{% block extra_script %}
+<script>
+    {% comment %} openCity('', 'officer_clicked'); {% endcomment %}
+    {% comment %} function filterSelection(c) {
+        var input, filter, ul, li, a, i, txtValue, integ;
+        ul = document.getElementById("myUL");
+        li = ul.getElementsByClassName("bread-list-item");
+        for (i = 0; i < li.length; i++) {
+            a = li[i].getElementsByTagName("span")[0];
+            console.log(a)
+            txtValue = a.textContent || a.innerText;
+            integ = parseInt(txtValue);
+            if (c == "officer"){
+                console.log('reached inside officer if');
+                if (integ < 14 && integ > 8){
+                    li[i].style.display = "block";
+                }
+                else{
+                    li[i].style.display = "none";
+                }
+            }
+            else if (c == "staff"){
+                if (integ < 9 && integ > -1){
+                    li[i].style.display = "block";
+                }
+                else if (integ == 15){
+                    li[i].style.display = "block";
+                }
+                else{
+                    li[i].style.display = "none";
+                }
+            }
+            else if (c == "postdoc"){
+                if (integ == 14){
+                    li[i].style.display = "block";
+                }
+                else{
+                    li[i].style.display = "none";
+                }
+            }
+            else if(c == "project-staff"){
+                li[i].style.display = "block";
+            }
+            else{
+                console.log('No staff category selected');
+                li[i].style.display = "block";
+            }
+        }
+    }
+
+    function openCity(evt, cityName) {
+        if(cityName==='officer_clicked'){
+            console.log('officer_clicked');
+            filterSelection('officer');
+            var element = document.getElementById("left_tab");
+            element.classList.add("w3-border-blue-grey");
+            var element = document.getElementById("middle_tab");
+            element.classList.remove("w3-border-blue-grey");
+            var element = document.getElementById("right_tab");
+            element.classList.remove("w3-border-blue-grey");
+        }
+        if(cityName==='staff_clicked'){
+            console.log('staff_clicked');
+            filterSelection('staff');
+            var element = document.getElementById("left_tab");
+            element.classList.remove("w3-border-blue-grey");
+            var element = document.getElementById("middle_tab");
+            element.classList.add("w3-border-blue-grey");
+            var element = document.getElementById("right_tab");
+            element.classList.remove("w3-border-blue-grey");
+        }
+        if(cityName==='postdoc_clicked'){
+            console.log('postdoc_clicked');
+            filterSelection('postdoc');
+            var element = document.getElementById("left_tab");
+            element.classList.remove("w3-border-blue-grey");
+            var element = document.getElementById("middle_tab");
+            element.classList.remove("w3-border-blue-grey");
+            var element = document.getElementById("right_tab");
+            element.classList.add("w3-border-blue-grey");
+        }
+        if(cityName=='project_staff_clicked'){
+            
+        }
+    } {% endcomment %}
+</script>
+
+{% endblock %}

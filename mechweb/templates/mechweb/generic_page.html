@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load mechweb_tags %}
+
+{% load wagtailcore_tags wagtailimages_tags %}
+
+{% block body_class %}template-genericpage-page{% endblock %}
+
+{% block content %}
+{% breadcrumbs%}
+<style>
+
+.container a{
+   text-decoration:underline;
+   color:#61a5c2;
+}
+</style>
+<div class="bg-light">
+      <br>
+<h1 class="text-center text-warning"> {{page.title}}</h1>
+<br>
+<div class="container card">
+<br>
+<div>
+{{page.body|richtext}}
+</div>
+<br>
+</div>
+<br>
+</div>
+<br>
+{% endblock %}

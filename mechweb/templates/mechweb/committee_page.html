@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% load static mechweb_tags %}
+
+{% load wagtailcore_tags wagtailimages_tags %}
+
+{% block body_class %}template-publication-homepage{% endblock %}
+{% block extra_css %}
+<style>
+
+.table-wrapper{
+  background:white;
+  width:70%;
+  margin:auto;
+}
+.wrapper{
+  padding-top:20px;
+}
+</style>
+
+{% endblock extra_css %}
+
+{% block content %}
+ {% breadcrumbs%}
+<div class="container-fluid">
+  <h1 class="text-center text-warning">{{ page.title }}</h1>
+  <!-- Intro -->
+  <div class="about text-center">{{ page.about|richtext }}</div>
+</div>
+<br>
+{% if page.specific.minutes_doc %}
+<ul>
+<li>
+{% for docs in page.specific.minutes_doc.all %}
+{{ docs.url }}
+{% endfor %}
+</li>
+</ul>
+<br><br>
+{% endif %}
+
+<div class="bg-light wrapper">
+{% if page.specific.faculty.all|length != 0 %}
+<div class="w3-container city" style="display:block">
+  <div class="table-wrapper">
+    <table class="table table-hover">
+        <thead class=" text-info">
+          <tr>
+
+              <th style="word-wrap: break-word;max-width: 200px">Designation</th>
+              <th style="word-wrap: break-word;max-width: 200px">Faculty Name</th>
+          </tr>
+        </thead>
+        <tbody class="">
+          {% for fac_mem in page.specific.faculty.all %}
+        <tr>
+            {% if page.specific.faculty.all|length != 0 %}
+            <td style="word-wrap: break-word;max-width: 200px">{{ fac_mem.designation }}</td>
+            <td style="word-wrap: break-word;max-width: 200px">{{ fac_mem.faculty.first_name }} {{ fac_mem.faculty.middle_name }} {{ fac_mem.faculty.last_name }}</td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+
+        <tbody>
+      </table>
+  </div>
+</div>
+<br><br>
+{% endif %}
+
+{% if page.specific.students.all|length != 0 %}
+<div class="w3-container city" style="display:block">
+  <div class="table-wrapper">
+    <table class="table table-hover">
+        <thead class="text-info">
+          <tr>
+              <th style="word-wrap: break-word;max-width: 200px">Designation</th>
+              <th style="word-wrap: break-word;max-width: 200px">Student Name</th>
+          </tr>
+        </thead>
+        <tbody class="">
+          {% for stud_mem in page.specific.students.all %}
+        <tr>
+            {% if page.specific.students.all|length != 0%}
+            <td style="word-wrap: break-word;max-width: 200px">{{ stud_mem.designation }}</td>
+            <td style="word-wrap: break-word;max-width: 200px">{{ stud_mem.student.first_name }} {{ stud_mem.student.middle_name }} {{ stud_mem.student.last_name }}</td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+
+        <tbody>
+      </table>
+  </div>
+</div>
+
+<br><br>
+{% endif %}
+
+{% if page.specific.com_other.all|length != 0 %}
+<div class="w3-container city" style="display:block">
+  <div class="table-wrapper">
+    <table class="table table-hover">
+        <thead class="text-info">
+          <tr>
+              <th style="word-wrap: break-word;max-width: 200px">Designation</th>
+              <th style="word-wrap: break-word;max-width: 200px"> Name</th>
+          </tr>
+        </thead>
+        <tbody class="">
+          {% for other in page.specific.com_other.all %}
+        <tr>
+            {% if page.specific.com_other.all|length != 0 %}
+            <td style="word-wrap: break-word;max-width: 200px">{{ other.designation }}</td>
+            <td style="word-wrap: break-word;max-width: 200px">{{ other.name }}</td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+
+        <tbody>
+      </table>
+  </div>
+</div>
+<br><br>
+{% endif %}
+</div>
+<script>
+  function filterSelection(year) {
+  var input, filter, ul, li, a, i, txtValue, integ, substraa, substrbb, yearint;
+  ul = document.getElementById("myInputpub");
+  list = ul.getElementsByClassName("filterDiv");
+  yearint = parseInt(year);
+  ;  // for (i = 0; i < li.length; i++) {
+  //       li[i].style.display = "none";
+  //   }
+
+  // Add the "show" class (display:block) to the filtered elements, and remove the "show" class from the elements that are not selected
+  for (i = 0; i < list.length; i++) {
+    a = list[i].id;
+    substraa = a.substring(0,4);
+    substrbb = a.substring(5,9);
+    integ = parseInt(substrbb);
+    if ( integ === yearint) {
+      list[i].style.display = "block";
+    } else {
+      list[i].style.display = "none";
+    }
+  }
+
+  }
+</script>
+
+
+
+{% endblock %}
+
+
+{% block extra_script %}
+
+{% endblock %}

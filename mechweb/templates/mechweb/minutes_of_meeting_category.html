@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load mechweb_tags %}
+
+{% block content %}
+ {% breadcrumbs%}
+
+ <style>
+    .section_name{
+        color:#000;
+      }
+      .section_name:hover{
+        text-decoration:none;
+      }
+      .list-group-item:hover{
+        background: #f5f5f5 !important;
+      }
+      
+</style>
+
+<div class="text-center mt-4 pb-5 bg-light">
+    <br>
+    <h2 class="text-warning">{{page.title}} Minutes of Meetings</h2>
+    <div class="py-5">
+        <ul class="list-group text-center"  style="width: 70%; margin: auto">
+            <div class="row d-flex justify-content-center">
+        {% for yearly in children %}
+            {% if not yearly.specific.show_only_yearly %}
+                {% for monthly in yearly.specific.get_ordered_children.live %}
+                <li class="col-sm-12 col-lg-4 col-md-5 section_box">
+                <a class="section_name" href="{{ monthly.specific.file.url }}"><h4 class="list-group-item mx-2 p-5 text-primary">{{ monthly.specific.get_month_display }} {{yearly.specific.year}} <i class="fa fa-file-pdf"></i></h4></a>
+            </li>
+                {% endfor %}        
+	    {% else %}
+            <li class="col-sm-12 col-lg-4 col-md-5 section_box">
+                <a class="section_name" href="{{ yearly.specific.file.url }}"><h4 class="list-group-item mx-2 p-5 text-primary">{{yearly.specific.year}} <i class="fa fa-file-pdf"></i></h4></a>
+            </li>
+            {% endif %}
+        {% endfor %}
+    </div>
+</ul>
+</div>
+
+            <br><br>
+            <div class="paginatio text-center">
+                <div class="step-links text-center" style="align: middle">
+                    <div class="current">
+                        Page {{ children.number }} of {{ children.paginator.num_pages }}.
+                    </div>
+                    <div class="row d-flex justify-content-around">
+                        {% if children.has_previous %}
+                        <a class="btn btn-sm btn-warning mx-1" href="{{url}}?page=1">&laquo; first</a>
+                        <a class="btn btn-sm btn-warning mx-1"
+                            href="{{page.url}}?page={{ children.previous_page_number }}">previous</a>
+                        {% else %}
+                        <a aria-disabled="true" class="disabled btn btn-sm btn-warning mx-1">&laquo; first</a>
+                        <a aria-disabled="true" class="disabled btn btn-sm btn-warning mx-1">previous</a>
+                        {% endif %}
+                        {% if children.has_next %}
+                        <a class="btn btn-sm btn-warning mx-1"
+                            href="{{page.url}}?page={{ children.next_page_number }}">next</a>
+                        <a class="btn btn-sm btn-warning mx-1"
+                            href="{{page.url}}?page={{ children.paginator.num_pages }}">last &raquo;</a>
+                        {% else %}
+                        <a aria-disabled="true" class="disabled btn btn-sm btn-warning mx-1">&laquo; next</a>
+                        <a aria-disabled="true" class="disabled btn btn-sm btn-warning mx-1">last &raquo;</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+</div>
+<br><br>
+{% endblock content %}

@@ -1,0 +1,55 @@
+{% load wagtailcore_tags %}
+
+{% if ancestors %}
+
+<nav aria-label="breadcrumb">
+<style>
+
+.breadcrumb li a {
+    border-bottom: 1px solid transparent;
+    color: #222546;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+{% comment %} p{
+    hyphens:auto;
+} {% endcomment %}
+
+.breadcrumb .normal:hover{
+    background:#fff3a9;
+    border-radius:3%;
+}
+.breadcrumb {
+    background:inherit;
+}
+
+.breadcrumb-item .item,.breadcrumb-item i {
+	vertical-align:middle;
+}
+
+.breadcrumb-item i{
+    opacity:0.5;
+    color:blue;
+}
+
+.breadcrumb li {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+</style>
+<div class="">
+    <ol class="breadcrumb">
+        {% for ancestor in ancestors %}
+        {% if forloop.last %}
+        <li class="breadcrumb-item active"><span class="item my-auto">{{ ancestor }}</span></li>
+        {% else %}
+        <li class="normal mr-2"><a class="breadcrumb-item py-2 px-1" href="{% pageurl ancestor %}"><span class="mr-1 item">{{ ancestor }}</span><i class="fa fa-angle-right  mx-1"></i></a></li>
+        {% endif %}
+        {% endfor %}
+    </ol>
+</div>
+</nav>
+{% endif %}

@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load wagtailcore_tags wagtailimages_tags %}
+{% load mechweb_tags %}
+
+{% block body_class %}template-student-homepage{% endblock %}
+
+
+
+{% block content %}
+{% get_media_prefix as MEDIA_URL %}
+  <br>
+
+{% if prog == '0' %}
+<div class="container-fluid text-center" style="font-size: 1.7em">
+{{ page.specific.btech_body|richtext }}
+</div>
+{% elif prog == '1' %}
+<div class="container-fluid text-center" style="font-size: 1.7em">
+{{ page.specific.mtech_body|richtext }}
+</div>
+{% elif prog == '2' %}
+    {% if page.specific.phd_body %}
+    <div class="container-fluid text-center" style="font-size: 1.7em">
+    {{ page.specific.phd_body|richtext }}
+    </div>
+    {% endif %}
+<span style="font-size: 22px ; margin-left: 20%">Filter by joining year : </span>
+<a href="?prog=2&year=2020"><button type="button" class="btn btn-outline-primary">2020</button></a>
+<a href="?prog=2&year=2019"><button type="button" class="btn btn-outline-primary">2019</button></a>
+<a href="?prog=2&year=2018"><button type="button" class="btn btn-outline-primary">2018</button></a>
+<a href="?prog=2&year=2017"><button type="button" class="btn btn-outline-primary">2017</button></a>
+<a href="?prog=2&year=2016"><button type="button" class="btn btn-outline-primary">2016</button></a>
+<a href="?prog=2&year=2015"><button type="button" class="btn btn-outline-primary">2015</button></a>
+<div class="dropdown">
+  <button class="btn btn-outline-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    Previous years
+  </button>
+  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+    <a class="dropdown-item" href="?prog=2&year=2014">2014</a>
+    <a class="dropdown-item" href="?prog=2&year=2013">2013</a>
+    <a class="dropdown-item" href="?prog=2&year=2012">2012</a>
+    <a class="dropdown-item" href="?prog=2&year=2011">2011</a>
+    <a class="dropdown-item" href="?prog=2&year=2010">2010</a>
+    <a class="dropdown-item" href="?prog=2&year=2009">2009</a>
+  </div>
+</div>
+
+  <hr>
+<div class="container-fluid">
+    <div class="row">
+<div class="col-xs-12 col-sm-6 col-md-9">
+</div>
+      <div class="col-xs-12 col-sm-6 col-md-3" >
+          <button class="btn btn-secondary" type="button">
+              <i class="fa fa-search"></i>
+            </button>
+         <input type="text" id="myInput" style="text-align:center" onkeyup="myFunction()" placeholder="Search for Students">
+      </div>
+    </div>
+</div>
+</div>
+
+
+
+
+<div class="container-fluid" >
+<div class="row bread-list justify-content-md-center" id="myUL" >
+{% for student in student_list %}
+  <div class="col-xs-11 col-md-5 bread-list-item">
+    <span style="display:none">{{ student }}</span>
+
+      <div class="row">
+          <div class="col-xs-4 col-sm-5 image">
+            <a href="{{ student.specific.url }}">
+              {% if student.specific.photo %}
+                {% image student.specific.photo original style='width:100%; height:100%' %}
+              {% else %}
+                  {% with MEDIA_URL|add:'images/phd/'|add:student.slug|add:'.jpg' as image_static %}
+                      <img src="{{ image_static }}" style='width:100%; height:100%' alt="{{ photo.alt }}" class="" />
+                {% endwith %}
+              {% endif %}
+              </a>
+          </div>
+          <div class="col-xs-8 col-sm-8">
+              <a href="{{ student.specific.url }}">
+                  <h2>{{ student }}</h2>
+              </a>
+              <ul class="bread-meta">
+                  <li><strong>{{ student.specific.get_programme_display }}{{ student.specific.leaving_year|date:'Y'|isalumni }}</strong></li>
+                  {% if student.specific.enrolment_year %}
+                      <li><span>Enrollment year</span>{{ student.specific.enrolment_year|date:"Y" }}</li>
+                  {% endif %}
+                  {% if student.specific.email_id %}
+                      <li><span>Email</span>{{ student.specific.email_id|noscrape|safe }}</li>
+                  {% endif %}
+                  {% if student.specific.roll_no %}
+                      <li><span>Enrollment NO.</span>{{ student.specific.roll_no }}</li>
+                  {% endif %}
+                  {% if student.specific.faculty_advisor %}
+                      <li><span>Supervisor</span>{{ student.specific.faculty_advisor }}</li>
+                  {% endif %}
+                  {% if student.specific.hostel_address_line_1 %}
+                      <li><span>Hostel</span>{{ student.specific.hostel_address_line_1 }}</li>
+                  {% endif %}
+
+              </ul>
+          </div>
+      </div>
+  </div>
+{% endfor %}
+</div>
+</div>
+
+  </div>
+
+
+
+{#{% if all_research_interests %}#}
+{#<div class="container-fluid">#}
+{#<div class="styletags">#}
+{#<strong>Research Interests:</strong>#}
+{#{% for interest in all_research_interests %}#}
+{#<a href="{{ page.url }}?tag={{ interest }}">{{ interest }}</a> |#}
+{#{% endfor %}#}
+{#</div>#}
+{#</div>#}
+{#{% endif %}#}
+
+{% elif prog == '3' %}
+<!-- TODO -->
+{% else %}
+{{ page.intro|richtext }}
+{% endif %}
+{% endblock content %}
+
+
+
+{% block extra_script %}
+    <script>
+    function myFunction() {
+    // Declare variables
+    var input, filter, ul, li, a, i, txtValue;
+    input = document.getElementById('myInput');
+    filter = input.value.toUpperCase();
+    ul = document.getElementById("myUL");
+    li = ul.getElementsByClassName("bread-list-item");
+
+    // Loop through all list items, and hide those who don't match the search query
+    for (i = 0; i < li.length; i++) {
+      a = li[i].getElementsByTagName("span")[0];
+      txtValue = a.textContent || a.innerText;
+      if (txtValue.toUpperCase().indexOf(filter) > -1) {
+        li[i].style.display = "";
+      } else {
+        li[i].style.display = "none";
+      }
+    }
+    }
+/*pagination button js*/
+    var btnContainer = document.getElementById("myDIV");
+
+    // Get all buttons with class="btn" inside the container
+    var btns = btnContainer.getElementsByClassName("btn");
+
+    // Loop through the buttons and add the active class to the current/clicked button
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].addEventListener("click", function() {
+        var current = document.getElementsByClassName("active");
+
+        // If there's no active class
+        if (current.length > 0) {
+          current[0].className = current[0].className.replace(" active", "");
+        }
+
+        // Add the active class to the current/clicked button
+        this.className += " active";
+      });
+    }
+    </script>
+
+{% endblock %}
+
+
+{#<hr>#}
+{#      {% if tag %}#}
+{#        <h2>Results for {{ tag }}</h2>#}
+{#          {% else %}#}
+{#          {% if student_list.number == 1 %}#}
+{#            <div class="row ">#}
+{#              <div class="col-xs-12 col-sm-2 col-md-4">#}
+{#                <a href="{{ page.url }}?prog=0" class="btn btn-lg btn-block">#}
+{#                  <i class="fa fa-check-square-o visible-xs"></i>#}
+{#                  <span class="hidden-xs">Bachelors</span>#}
+{#                </a>#}
+{#              </div>#}
+{#              <div class="col-xs-12 col-sm-2 col-md-4">#}
+{#                <a href="{{ page.url }}?prog=1" class="btn btn-lg btn-block">#}
+{#                  <i class="fa fa-check-square-o visible-xs"></i>#}
+{#                  <span class="hidden-xs">Masters</span>#}
+{#                </a>#}
+{#              </div>#}
+{#              <div class="col-xs-12 col-sm-2 col-md-4">#}
+{#                <a href="{{ page.url }}?prog=2" class="btn btn-lg btn-block">#}
+{#                  <i class="fa fa-check-square-o visible-xs"></i>#}
+{#                  <span class="hidden-xs">Research Scholars</span>#}
+{#                </a>#}
+{#              </div>#}
+{#            </div>#}
+{#            {% endif %}#}
+{#          {% endif %}#}
+{#  <hr>#}

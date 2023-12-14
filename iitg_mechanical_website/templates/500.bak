@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html class="no-js">
+    <head>
+        <meta charset="utf-8" />
+        <title>Internal server error</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+    </head>
+    <body>
+        <h1>Internal server error</h1>
+
+        <h2><p>Sorry for the inconvenience. Please <a href="https://iitg.ac.in/mechold">click here</a> to go to the old website and continue browsing.</p></h2>
+    	<p>How to help us resolve this issue? You can drop an email to mechwebadmin@iitg.ac.in with subject:"ME Website Error", the screenshot, link and other details.</p>
+    </body>
+</html>
