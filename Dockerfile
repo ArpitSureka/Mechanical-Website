@@ -8,6 +8,7 @@ ENV DJANGO_ENV dev
 
 COPY ./requirements.txt /code/requirements.txt
 RUN pip install --upgrade pip
+# apt-get install apache2-dev
 # Install any needed packages specified in requirements.txt
 RUN pip install -r /code/requirements.txt
 RUN pip install gunicorn
@@ -17,6 +18,8 @@ COPY . /code/
 # Set the working directory to /code/
 WORKDIR /code/
 
+CMD apt-get install redis-server
+CMD service redis-server start
 RUN python manage.py migrate
 
 RUN useradd wagtail
