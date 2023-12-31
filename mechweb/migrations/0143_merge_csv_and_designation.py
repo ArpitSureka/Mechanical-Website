@@ -10,6 +10,11 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+         migrations.AddField(
+            model_name='studentbatch',
+            name='csv_file',
+            field=models.FileField(upload_to='csv_uploads', blank=True, null=True),
+        ),
         migrations.AlterField(
             model_name='staffpage',
             name='designation',

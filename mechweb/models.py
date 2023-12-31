@@ -2406,24 +2406,47 @@ class StudentBatch(Page):
         blank=True,
         validators=[MinValueValidator(1994), max_value_current_year],
     )
-    table_view = models.BooleanField(default=False)
-    alumni_batch = models.BooleanField(default=False, verbose_name="Move to Alumni Corner")
+    csv_file = models.FileField(
+        upload_to="csv_uploads",
+        null=True,
+        blank=True,
+        help_text="Upload a CSV file with student data",
+    )
+    # table_view = models.BooleanField(default=False)
+    # alumni_batch = models.BooleanField(default=False, verbose_name="Move to Alumni Corner")
     content_panels = Page.content_panels + [
         FieldPanel("enrollment_year"),
         FieldPanel("graduation_year"),
-        FieldPanel("table_view"),
-        MultiFieldPanel(
-            [
-                FieldPanel("alumni_batch"),
-            ],
-            heading="Alumni corner details",
-        ),
+        FieldPanel("csv_file"),
+        # FieldPanel("table_view"),
+        # MultiFieldPanel(
+        #     [
+        #         FieldPanel("alumni_batch"),
+        #     ],
+        #     heading="Alumni corner details",
+        # ),
     ]
     parent_page_types = [
         "Students",
     ]
     subpage_types = ["Student"]
-
+    def process_csv_file(self):
+        print("Processing CSV file...")
+        if self.csv_file:
+            with open(self.csv_file.path, "r") as file:
+                reader = csv.DictReader(file)
+                for row in reader:
+                    Student.objects.create(
+                        parent=self,
+                        webmail=row["webmail"],
+                        first_name=row["first_name"],
+                        middle_name=row["middle_name"],
+                        last_name=row["last_name"],
+                        email_id=row["email_id"],
+                        roll_no=row["roll_no"],
+                        enrollment_year=datetime.strptime(row["enrollment_year"], "%Y-%m-%d").date(),
+                        leaving_year=datetime.strptime(row["leaving_year"], "%Y-%m-%d").date(),
+                    )
     def get_children_order_by_title(self):
         children = super().get_children().order_by("title")
         return children
@@ -2433,7 +2456,9 @@ class StudentBatch(Page):
         while node.specific_class != Program and node.specific_class != ProgramSpecialization:
             node = node.get_parent()
         return node
-
+    @property
+    def get_current_batches(cls):
+        return cls.objects.child_of(cls).filter(alumni_batch=False).order_by("-title")
     class Meta:
         verbose_name = "Student Batch"
         verbose_name_plural = "Student Batches"
@@ -2449,73 +2474,73 @@ class Student(Page):
     roll_no = models.IntegerField(blank=True, null=True)
     enrollment_year = models.DateField(blank=True, null=True)
     leaving_year = models.DateField(blank=True, null=True)
-    is_exchange = models.BooleanField(default=False, verbose_name="International Student")
-    supervisor = models.ForeignKey(
-        "FacultyPage",
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        verbose_name="Main supervisor/Faculty Advisor",
-        related_name="supervisor",
-    )
-    co_supervisor = models.ForeignKey(
-        "FacultyPage",
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        verbose_name="Co-supervisor",
-        related_name="co_supervisor",
-    )
-    thesis_title = models.CharField(max_length=500, blank=True, null=True)
-    contact_number = models.CharField(max_length=30, blank=True)
-    hostel_address = models.CharField(max_length=264, blank=True)
-    photo = models.ForeignKey(
-        "wagtailimages.Image",
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="+",
-    )
-    intro = models.CharField(max_length=250, blank=True)
-    body = RichTextField(blank=True, features=CUSTOM_RICHTEXT)
-    website = models.URLField(blank=True)
-    linkedin = models.URLField(blank=True)
+    # is_exchange = models.BooleanField(default=False, verbose_name="International Student")
+    # supervisor = models.ForeignKey(
+    #     "FacultyPage",
+    #     null=True,
+    #     blank=True,
+    #     on_delete=models.SET_NULL,
+    #     verbose_name="Main supervisor/Faculty Advisor",
+    #     related_name="supervisor",
+    # )
+    # co_supervisor = models.ForeignKey(
+    #     "FacultyPage",
+    #     null=True,
+    #     blank=True,
+    #     on_delete=models.SET_NULL,
+    #     verbose_name="Co-supervisor",
+    #     related_name="co_supervisor",
+    # )
+    # thesis_title = models.CharField(max_length=500, blank=True, null=True)
+    # contact_number = models.CharField(max_length=30, blank=True)
+    # hostel_address = models.CharField(max_length=264, blank=True)
+    # photo = models.ForeignKey(
+    #     "wagtailimages.Image",
+    #     null=True,
+    #     blank=True,
+    #     on_delete=models.SET_NULL,
+    #     related_name="+",
+    # )
+    # intro = models.CharField(max_length=250, blank=True)
+    # body = RichTextField(blank=True, features=CUSTOM_RICHTEXT)
+    # website = models.URLField(blank=True)
+    # linkedin = models.URLField(blank=True)
 
-    parent_page_types = ["Students", "StudentBatch"]
-    subpage_types = []
+    parent_page_types = ["StudentBatch"]
+    # subpage_types = []
 
     content_panels = Page.content_panels + [
-        # FieldPanel('user'),
-        FieldPanel("first_name"),
-        FieldPanel("middle_name"),
-        FieldPanel("last_name"),
-        FieldPanel("webmail"),
-        FieldPanel("email_id"),
-        FieldPanel("roll_no"),
-        FieldPanel("enrollment_year"),
-        FieldPanel("leaving_year"),
-        FieldPanel("is_exchange"),
-        AutocompletePanel("supervisor", target_model="mechweb.FacultyPage"),
-        AutocompletePanel("co_supervisor", target_model="mechweb.FacultyPage"),
-        InlinePanel(
-            "custom_supervisor",
-            max_num=2,
-            label="Supervisor/Co-supervisor/Faculty Advisor (Only if the supervisor/co-supervisor/faculty advisor is from other department)",
-        ),
-        FieldPanel("thesis_title"),
-        FieldPanel("hostel_address"),
-        MultiFieldPanel(
-            [
-                FieldPanel("contact_number"),
-                FieldPanel("website"),
-                FieldPanel("linkedin"),
-            ],
-            heading="Contact Information",
-            classname="collapsible",
-        ),
-        ImageChooserPanel("photo"),
-        FieldPanel("intro"),
-        FieldPanel("body"),
+        # FieldPanel("first_name"),
+        # FieldPanel("middle_name"),
+        # FieldPanel("last_name"),
+        # FieldPanel("webmail"),
+        # FieldPanel("email_id"),
+        # FieldPanel("roll_no"),
+        # FieldPanel("enrollment_year"),
+        # FieldPanel("leaving_year"),
+
+        # FieldPanel("is_exchange"),
+        # AutocompletePanel("supervisor", target_model="mechweb.FacultyPage"),
+        # AutocompletePanel("co_supervisor", target_model="mechweb.FacultyPage"),
+        # InlinePanel(
+        #     "custom_supervisor",
+        #     max_num=2,
+        #     label="Supervisor/Co-supervisor/Faculty Advisor (Only if the supervisor/co-supervisor/faculty advisor is from other department)",
+        # ),
+        # FieldPanel("thesis_title"),
+        # FieldPanel("hostel_address"),
+        # MultiFieldPanel(
+        #     [
+        #         FieldPanel("contact_number"),
+        #         FieldPanel("website"),
+        #         FieldPanel("linkedin"),
+        #     ],
+        #     heading="Contact Information",
+        #     classname="collapsible",
+        # ),
+        # ImageChooserPanel("photo"),
+        # FieldPanel("intro"),
+        # FieldPanel("body"),
     ]
 
     def __str__(self):

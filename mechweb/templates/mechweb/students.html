@@ -46,6 +46,22 @@ body {
       {% for batch in page.current_batches.live %}
         <a href="{% pageurl batch %}" class="py-3 my-2 batch-tab">
        <i class="fa fa-user" aria-hidden="true"></i> {{batch.title}}</a>
+       <ul>
+        {% for student in batch.get_children.live %}
+        <li>
+          <!-- Display details of each student -->
+          <strong>{{ student.title }}</strong><br>
+          Webmail: {{ student.specific.webmail }}<br>
+          First Name: {{ student.specific.first_name }}<br>
+          Middle Name: {{ student.specific.middle_name }}<br>
+          Last Name: {{ student.specific.last_name }}<br>
+          Email ID: {{ student.specific.email_id }}<br>
+          Roll No: {{ student.specific.roll_no }}<br>
+          Enrollment Year: {{ student.specific.enrollment_year|date:"Y" }}<br>
+          Leaving Year: {{ student.specific.leaving_year|date:"Y" }}<br>
+      </li>
+        {% endfor %}
+    </ul>
       {% endfor %}  
       </ul>
     </div>  

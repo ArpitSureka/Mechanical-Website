@@ -9,7 +9,7 @@ from django.dispatch import receiver
 from wagtail.core import hooks
 
 from .models import CustomUser, FacultyHomePage, FacultyPage, StudentHomePage, StudentPage, AlumniHomePage, AlumnusPage, StaffHomePage, StaffPage, MechHomePage
-
+from .models import StudentBatch
 ######################################################
 
 
@@ -215,7 +215,10 @@ class WelcomePanel:
 def add_another_welcome_panel(request, panels):
     panels.append(WelcomePanel())
 
-
+@hooks.register('after_create_page')
+def process_csv_file_on_save(request, page):
+    if isinstance(page.specific, StudentBatch):
+        page.specific.process_csv_file()
 # @hooks.register()
 
 # @hooks.register('construct_explorer_page_queryset')
