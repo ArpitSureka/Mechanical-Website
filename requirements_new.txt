@@ -4,11 +4,11 @@ asgiref==3.2.10
 beautifulsoup4==4.8.2
 CacheControl==0.12.6
 certifi==2020.6.20
-cffi
+cffi==1.16.0
 chardet==3.0.4
 colorama==0.4.3
 contextlib2==0.6.0
-cryptography
+cryptography==42.0.5
 defusedxml==0.7.0rc1
 distlib==0.3.0
 distro==1.4.0
@@ -31,13 +31,12 @@ jdcal==1.4.1
 l18n==2018.5
 lockfile==0.12.2
 Markdown==3.3.7
-#mod-wsgi==4.7.1
 msgpack==0.6.2
 oauthlib==3.1.0
 openpyxl==3.0.5
 packaging==20.3
 pep517==0.8.2
-Pillow
+Pillow==8.4.0
 progress==1.5
 pycparser==2.20
 PyJWT==1.7.1
@@ -56,6 +55,7 @@ social-auth-core==3.3.3
 soupsieve==2.0.1
 sqlparse==0.3.1
 tablib==2.0.0
+toml==0.10.2
 Unidecode==1.1.1
 urllib3==1.25.10
 wagtail==2.11.1
