@@ -21,6 +21,7 @@ WORKDIR /code/
 CMD apt-get install redis-server
 CMD service redis-server start
 RUN python manage.py migrate
+RUN python manage.py crontab add
 
 RUN useradd wagtail
 RUN chown -R wagtail /code
@@ -28,3 +29,4 @@ USER wagtail
 
 EXPOSE 8000
 CMD exec gunicorn iitg_mechanical_website.wsgi:application --bind 0.0.0.0:8000 --workers 3
+RUN python manage.py crontab add

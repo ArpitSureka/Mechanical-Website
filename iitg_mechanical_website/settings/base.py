@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     "social_django",
     # "debug_toolbar",
     "rest_framework",
+    "django_crontab",
 ]
 
 # # Application definition
@@ -140,6 +141,10 @@ CACHES = {
     #     "TIMEOUT": 600,
     # },
 }
+
+CRONJOBS = [
+('1 * * * *', 'mechweb.cron_jobs.publications.updateGoogleScholarPublications', '>> ' + os.path.join(BASE_DIR,'log/debug7.log' + ' 2>&1 ')),
+]
 
 
 # Password validation
