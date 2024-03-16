@@ -1,7 +1,6 @@
 from django.core import paginator
 from alumni.models import AlumniEventPage
 import datetime
-import pytz
 from django import forms
 from django.contrib.auth.models import AbstractUser
 from django.core.paginator import Paginator
@@ -9,13 +8,20 @@ from django.db import models
 from django.shortcuts import render
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-
+from django.conf import settings
+import csv
+from io import StringIO
+import requests
+import os
+from django.core.exceptions import ValidationError
 ######################################################
 # for tagging
 from modelcluster.contrib.taggit import ClusterTaggableManager
 from modelcluster.fields import ParentalKey, ParentalManyToManyField
 from taggit.models import TaggedItemBase
 from wagtail.admin.edit_handlers import FieldRowPanel, FieldPanel, InlinePanel, MultiFieldPanel, TabbedInterface, ObjectList, PageChooserPanel
+from wagtail.images.models import Image
+from django.core.files import File
 
 # , StreamFieldPanel
 from wagtail.core.fields import RichTextField
@@ -26,7 +32,7 @@ from wagtail.core.fields import RichTextField
 # from wagtail.documents.blocks import DocumentChooserBlock
 from wagtail.core.models import Page, Orderable
 from wagtail.documents.edit_handlers import DocumentChooserPanel
-
+# from wagtail.core.fields import CSVField
 ######################################################
 from wagtail.images.edit_handlers import ImageChooserPanel
 
@@ -2408,6 +2414,7 @@ class StudentBatch(Page):
     )
     table_view = models.BooleanField(default=False)
     alumni_batch = models.BooleanField(default=False, verbose_name="Move to Alumni Corner")
+    csv_file = models.FileField(upload_to='csv_files/', null=True, blank=True)  
     content_panels = Page.content_panels + [
         FieldPanel("enrollment_year"),
         FieldPanel("graduation_year"),
@@ -2418,7 +2425,10 @@ class StudentBatch(Page):
             ],
             heading="Alumni corner details",
         ),
+        FieldPanel("csv_file"), 
     ]
+
+
     parent_page_types = [
         "Students",
     ]
@@ -2427,6 +2437,63 @@ class StudentBatch(Page):
     def get_children_order_by_title(self):
         children = super().get_children().order_by("title")
         return children
+
+
+    def save(self, *args, **kwargs):
+        try:
+            if self.csv_file:
+                # Check if the uploaded file is a CSV file
+                if not self.csv_file.name.endswith('.csv'):
+                    raise ValidationError("The uploaded file is not a CSV file.")
+
+                csv_data = self.csv_file.read().decode('utf-8')
+                csv_file = StringIO(csv_data)
+                csv_reader = csv.DictReader(csv_file)
+
+                image_dir = os.path.join(settings.MEDIA_ROOT, 'student_images',str(self.enrollment_year))
+                os.makedirs(image_dir, exist_ok=True)
+                # Vineet
+                for row in csv_reader:
+                    roll_no = row["roll_no"]
+                    image_url = row['photo'] if row['photo'] else None
+
+                    if image_url:
+                        try:
+                            image_filename = f"{roll_no}.jpg"  # Name the image using the title
+                            image_path = os.path.join(image_dir, image_filename)
+                            response = requests.get(image_url)
+                            with open(image_path, 'wb') as f:
+                                f.write(response.content)
+
+                            # Create a Wagtail Image instance
+                            with open(image_path, 'rb') as f:
+                                wagtail_image = Image.objects.create(
+                                    title=roll_no,  # You can set the title to student's title or anything else
+                                    file=File(f, name=os.path.basename(image_path))
+                                )
+
+                        except Exception as e:
+                            print(f"Failed to download image from URL {image_url}: {e}")
+                            continue  # Skip this student if image download fails
+
+                    # Create Student instance and associate the image
+                    student = Student(
+                        title=row['title'],
+                        webmail=row['webmail'],
+                        first_name=row['first_name'],
+                        middle_name=row['middle_name'],
+                        last_name=row['last_name'],
+                        roll_no=row['roll_no'] if row['roll_no'] else None,
+                        photo=wagtail_image if image_url else None
+                    )
+                    self.add_child(instance=student)
+
+        except Exception as e:
+            # Handle any exceptions that occur during CSV processing
+            raise ValidationError(f"An error occurred while processing the CSV file: {str(e)}")
+
+        # Call the superclass method to save the page
+        return super(StudentBatch, self).save(*args, **kwargs)
 
     def get_program(self):
         node = self.get_parent()
@@ -2440,7 +2507,6 @@ class StudentBatch(Page):
 
 
 class Student(Page):
-    # user = models.ForeignKey(AUTH_USER_MODEL, related_name='student_profile', null=True, on_delete=models.SET_NULL,blank=True,verbose_name="User(only if the user exists)")
     webmail = models.EmailField(blank=True, null=True)
     first_name = models.CharField(max_length=50)
     middle_name = models.CharField(max_length=50, blank=True)
@@ -2449,26 +2515,6 @@ class Student(Page):
     roll_no = models.IntegerField(blank=True, null=True)
     enrollment_year = models.DateField(blank=True, null=True)
     leaving_year = models.DateField(blank=True, null=True)
-    is_exchange = models.BooleanField(default=False, verbose_name="International Student")
-    supervisor = models.ForeignKey(
-        "FacultyPage",
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        verbose_name="Main supervisor/Faculty Advisor",
-        related_name="supervisor",
-    )
-    co_supervisor = models.ForeignKey(
-        "FacultyPage",
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        verbose_name="Co-supervisor",
-        related_name="co_supervisor",
-    )
-    thesis_title = models.CharField(max_length=500, blank=True, null=True)
-    contact_number = models.CharField(max_length=30, blank=True)
-    hostel_address = models.CharField(max_length=264, blank=True)
     photo = models.ForeignKey(
         "wagtailimages.Image",
         null=True,
@@ -2476,16 +2522,10 @@ class Student(Page):
         on_delete=models.SET_NULL,
         related_name="+",
     )
-    intro = models.CharField(max_length=250, blank=True)
-    body = RichTextField(blank=True, features=CUSTOM_RICHTEXT)
-    website = models.URLField(blank=True)
-    linkedin = models.URLField(blank=True)
-
     parent_page_types = ["Students", "StudentBatch"]
     subpage_types = []
 
     content_panels = Page.content_panels + [
-        # FieldPanel('user'),
         FieldPanel("first_name"),
         FieldPanel("middle_name"),
         FieldPanel("last_name"),
@@ -2494,28 +2534,7 @@ class Student(Page):
         FieldPanel("roll_no"),
         FieldPanel("enrollment_year"),
         FieldPanel("leaving_year"),
-        FieldPanel("is_exchange"),
-        AutocompletePanel("supervisor", target_model="mechweb.FacultyPage"),
-        AutocompletePanel("co_supervisor", target_model="mechweb.FacultyPage"),
-        InlinePanel(
-            "custom_supervisor",
-            max_num=2,
-            label="Supervisor/Co-supervisor/Faculty Advisor (Only if the supervisor/co-supervisor/faculty advisor is from other department)",
-        ),
-        FieldPanel("thesis_title"),
-        FieldPanel("hostel_address"),
-        MultiFieldPanel(
-            [
-                FieldPanel("contact_number"),
-                FieldPanel("website"),
-                FieldPanel("linkedin"),
-            ],
-            heading="Contact Information",
-            classname="collapsible",
-        ),
         ImageChooserPanel("photo"),
-        FieldPanel("intro"),
-        FieldPanel("body"),
     ]
 
     def __str__(self):
