@@ -13,6 +13,7 @@ import csv
 from io import StringIO
 import requests
 import os
+import hashlib
 from django.core.exceptions import ValidationError
 ######################################################
 # for tagging
@@ -2440,19 +2441,22 @@ class StudentBatch(Page):
 
 
     def save(self, *args, **kwargs):
+
         try:
             if self.csv_file:
                 # Check if the uploaded file is a CSV file
                 if not self.csv_file.name.endswith('.csv'):
                     raise ValidationError("The uploaded file is not a CSV file.")
+                    
 
                 csv_data = self.csv_file.read().decode('utf-8')
+
+                # If no matching CSV file found, proceed with processing the new file
                 csv_file = StringIO(csv_data)
                 csv_reader = csv.DictReader(csv_file)
 
-                image_dir = os.path.join(settings.MEDIA_ROOT, 'student_images',str(self.enrollment_year))
+                image_dir = os.path.join(settings.MEDIA_ROOT, 'student_images', str(self.enrollment_year))
                 os.makedirs(image_dir, exist_ok=True)
-                # Vineet
                 for row in csv_reader:
                     roll_no = row["roll_no"]
                     image_url = row['photo'] if row['photo'] else None
@@ -2476,18 +2480,23 @@ class StudentBatch(Page):
                             print(f"Failed to download image from URL {image_url}: {e}")
                             continue  # Skip this student if image download fails
 
-                    # Create Student instance and associate the image
-                    student = Student(
-                        title=row['title'],
-                        webmail=row['webmail'],
-                        first_name=row['first_name'],
-                        middle_name=row['middle_name'],
-                        last_name=row['last_name'],
-                        roll_no=row['roll_no'] if row['roll_no'] else None,
-                        photo=wagtail_image if image_url else None
-                    )
-                    self.add_child(instance=student)
+                    is_duplicate=False
 
+                    for child in self.get_children():
+                        if str(child.specific.roll_no) == row['roll_no']:
+                            is_duplicate=True
+                            break
+                    if not is_duplicate:            
+                        student = Student(
+                            title=row['title'],
+                            webmail=row['webmail'],
+                            first_name=row['first_name'],
+                            middle_name=row['middle_name'],
+                            last_name=row['last_name'],
+                            roll_no=row['roll_no'] if row['roll_no'] else None,
+                            photo=wagtail_image if image_url else None
+                        )
+                        self.add_child(instance=student)
         except Exception as e:
             # Handle any exceptions that occur during CSV processing
             raise ValidationError(f"An error occurred while processing the CSV file: {str(e)}")
