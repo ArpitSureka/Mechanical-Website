@@ -61,7 +61,8 @@ INSTALLED_APPS = [
     "social_django",
     # "debug_toolbar",
     "rest_framework",
-    "django_crontab",
+    # "django_crontab",
+    "django_celery_results"
 ]
 
 # # Application definition
@@ -142,9 +143,12 @@ CACHES = {
     # },
 }
 
-CRONJOBS = [
-('1 * * * *', 'mechweb.cron_jobs.publications.updateGoogleScholarPublications', '>> ' + os.path.join(BASE_DIR,'log/debug7.log' + ' 2>&1 ')),
-]
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_TIMEZONE = 'Asia/Kolkata'
 
 
 # Password validation
