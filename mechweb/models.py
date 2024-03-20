@@ -2472,19 +2472,26 @@ class StudentBatch(Page):
                             # Create a Wagtail Image instance
                             with open(image_path, 'rb') as f:
                                 wagtail_image = Image.objects.create(
-                                    title=roll_no,  # You can set the title to student's title or anything else
+                                    title=roll_no,  
                                     file=File(f, name=os.path.basename(image_path))
                                 )
-
+                                print(wagtail_image)
                         except Exception as e:
                             print(f"Failed to download image from URL {image_url}: {e}")
-                            continue  # Skip this student if image download fails
+                            continue 
 
                     is_duplicate=False
-
+                   
                     for child in self.get_children():
                         if str(child.specific.roll_no) == row['roll_no']:
                             is_duplicate=True
+                            child.specific.title = row['title']
+                            child.specific.webmail = row['webmail']
+                            child.specific.first_name = row['first_name']
+                            child.specific.middle_name = row['middle_name']
+                            child.specific.last_name = row['last_name']
+                            child.specific.photo = wagtail_image if image_url else None
+                            child.specific.save()
                             break
                     if not is_duplicate:            
                         student = Student(
