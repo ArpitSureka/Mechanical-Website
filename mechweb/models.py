@@ -13,7 +13,7 @@ import csv
 from io import StringIO
 import requests
 import os
-import hashlib
+import re
 from django.core.exceptions import ValidationError
 ######################################################
 # for tagging
@@ -2460,25 +2460,26 @@ class StudentBatch(Page):
                 for row in csv_reader:
                     roll_no = row["roll_no"]
                     image_url = row['photo'] if row['photo'] else None
-
+                    pattern = r'id=([a-zA-Z0-9_-]+)'
+                    match = re.search(pattern, image_url)
+                    file_id = match.group(1)
+                    download_url = f"https://drive.google.com/uc?id={file_id}"
                     if image_url:
                         try:
-                            image_filename = f"{roll_no}.jpg"  # Name the image using the title
+                            image_filename = f"{roll_no}.jpg" 
                             image_path = os.path.join(image_dir, image_filename)
-                            response = requests.get(image_url)
+                            response = requests.get(download_url)
                             with open(image_path, 'wb') as f:
                                 f.write(response.content)
 
-                            # Create a Wagtail Image instance
                             with open(image_path, 'rb') as f:
                                 wagtail_image = Image.objects.create(
                                     title=roll_no,  
                                     file=File(f, name=os.path.basename(image_path))
                                 )
-                                print(wagtail_image)
                         except Exception as e:
-                            print(f"Failed to download image from URL {image_url}: {e}")
-                            continue 
+                            print(f"Failed to download image from URL {download_url}: {e}")
+                            continue                     
 
                     is_duplicate=False
                    
@@ -2505,7 +2506,6 @@ class StudentBatch(Page):
                         )
                         self.add_child(instance=student)
         except Exception as e:
-            # Handle any exceptions that occur during CSV processing
             raise ValidationError(f"An error occurred while processing the CSV file: {str(e)}")
 
         # Call the superclass method to save the page
