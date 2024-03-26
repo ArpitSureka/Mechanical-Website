@@ -2458,7 +2458,7 @@ class StudentBatch(Page):
                 image_dir = os.path.join(settings.MEDIA_ROOT, 'student_images', str(self.enrollment_year))
                 os.makedirs(image_dir, exist_ok=True)
                 for row in csv_reader:
-                    roll_no = row["roll_no"]
+                    roll_no = row["Roll No"]
                     image_url = row['photo'] if row['photo'] else None
                     pattern = r'id=([a-zA-Z0-9_-]+)'
                     match = re.search(pattern, image_url)
@@ -2484,25 +2484,50 @@ class StudentBatch(Page):
                     is_duplicate=False
                    
                     for child in self.get_children():
-                        if str(child.specific.roll_no) == row['roll_no']:
+                        if str(child.specific.roll_no) == row['Roll No']:
                             is_duplicate=True
-                            child.specific.title = row['title']
-                            child.specific.webmail = row['webmail']
-                            child.specific.first_name = row['first_name']
-                            child.specific.middle_name = row['middle_name']
-                            child.specific.last_name = row['last_name']
+                            child.specific.title = row['Full Name']
+                            child.specific.webmail = row['IITG Email Id']
+                            child.specific.first_name = row['First Name'] if row["First Name"] else None
+                            child.specific.middle_name = row['Middle Name'] if row["Middle Name"] else None
+                            child.specific.last_name = row['Last Name'] if row['Last Name'] else None
+                            child.specific.email_id = row['Personal mail Id'] if row["Personal mail Id"] else None
+                            child.specific.roll_no = row['Roll No'] if row['Roll No'] else None
+                            # child.specific.enrollment_year = row['Enrollment Year'] if row["Enrollment Year"] else None
+                            # child.specific.leaving_year = row['Leaving Year'] if row["Leaving Year"] else None
+                            child.specific.is_exchange = row['Is Exchange'] if row['Is Exchange'] else False
+                            child.specific.supervisor = row['supervisor'] if row['supervisor'] else None
+                            child.specific.co_supervisor = row['Co Supervisor'] if row['Co Supervisor'] else None
+                            child.specific.thesis_title = row['Thesis Title'] if row['Thesis Title'] else None
+                            child.specific.contact_number = row['Contact Number'] if row["Contact Number"] else None
+                            child.specific.hostel_address = row['Hostel'] if row["Hostel"] else None
+                            # child.specific.intro = row['intro'] if row['intro'] else None
+                            child.specific.linkedin = row['linkedin'] if row['linkedin'] else None
+                            child.specific.website = row['website'] if row['website'] else None
+                            # child.specific.body = row['body'] if row['body'] else None
                             child.specific.photo = wagtail_image if image_url else None
                             child.specific.save()
                             break
                     if not is_duplicate:            
                         student = Student(
-                            title=row['title'],
-                            webmail=row['webmail'],
-                            first_name=row['first_name'],
-                            middle_name=row['middle_name'],
-                            last_name=row['last_name'],
-                            roll_no=row['roll_no'] if row['roll_no'] else None,
-                            photo=wagtail_image if image_url else None
+                            title=row['Full Name'],         #Data from google form
+                            webmail=row['IITG Email Id'],         #Data from google form
+                            first_name=row['First Name'] if row["First Name"] else None,        #Data from google form
+                            middle_name=row['Middle Name'] if row["Middle Name"] else None,        #Data from google form
+                            last_name=row['Last Name'] if row['Last Name'] else None,        #Data from google form
+                            email_id=row['Personal mail Id'] if row["Personal mail Id"] else None,   #Data from google form
+                            roll_no=row['Roll No'] if row['Roll No'] else None,   #Data from google form
+                            # enrollment_year=row['Enrollment Year'] if row["Enrollment Year"] else None,   #Data from google form
+                            # leaving_year=row['Leaving Year'] if row["Leaving Year"] else None,   #Data from google form
+                            is_exchange=row['Is Exchange'] if row['Is Exchange'] else False,   #Data from google form
+                            supervisor=row['supervisor'] if row['supervisor'] else None,   #Data from google form
+                            co_supervisor=row['Co Supervisor'] if row['Co Supervisor'] else None,   #Data from google form
+                            thesis_title=row['Thesis Title'] if row['Thesis Title'] else None,   #Data from google form
+                            contact_number=row['Contact Number'] if row["Contact Number"] else None,   #Data from google form
+                            hostel_address=row['Hostel'] if row["Hostel"] else None,   #Data from google form
+                            linkedin=row['linkedin'] if row['linkedin'] else None,   #Data from google form
+                            website=row['website'] if row['website'] else None,   #Data from google form
+                            photo=wagtail_image if image_url else None   #Data from google form
                         )
                         self.add_child(instance=student)
         except Exception as e:
@@ -2524,13 +2549,33 @@ class StudentBatch(Page):
 
 class Student(Page):
     webmail = models.EmailField(blank=True, null=True)
-    first_name = models.CharField(max_length=50)
-    middle_name = models.CharField(max_length=50, blank=True)
-    last_name = models.CharField(max_length=50, blank=True)
-    email_id = models.EmailField(blank=True, verbose_name="Personal Email ID")
+    first_name = models.CharField(max_length=50,null=True)
+    middle_name = models.CharField(max_length=50, blank=True, null=True)
+    last_name = models.CharField(max_length=50, blank=True,null=True)
+    email_id = models.EmailField(blank=True, verbose_name="Personal Email ID",null=True)
     roll_no = models.IntegerField(blank=True, null=True)
     enrollment_year = models.DateField(blank=True, null=True)
     leaving_year = models.DateField(blank=True, null=True)
+    is_exchange = models.BooleanField(default=False, verbose_name="International Student")
+    supervisor = models.ForeignKey(
+        "FacultyPage",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        verbose_name="Main supervisor/Faculty Advisor",
+        related_name="supervisor",
+    )
+    co_supervisor = models.ForeignKey(
+        "FacultyPage",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        verbose_name="Co-supervisor",
+        related_name="co_supervisor",
+    )
+    thesis_title = models.CharField(max_length=500, blank=True, null=True)
+    contact_number = models.CharField(max_length=30, blank=True,null=True)
+    hostel_address = models.CharField(max_length=264, blank=True,null=True)
     photo = models.ForeignKey(
         "wagtailimages.Image",
         null=True,
@@ -2538,10 +2583,16 @@ class Student(Page):
         on_delete=models.SET_NULL,
         related_name="+",
     )
+    intro = models.CharField(max_length=250, blank=True,null=True)
+    body = RichTextField(blank=True, features=CUSTOM_RICHTEXT, null=True)
+    website = models.URLField(blank=True,null=True)
+    linkedin = models.URLField(blank=True,null=True)
+
     parent_page_types = ["Students", "StudentBatch"]
     subpage_types = []
 
     content_panels = Page.content_panels + [
+        # FieldPanel('user'),
         FieldPanel("first_name"),
         FieldPanel("middle_name"),
         FieldPanel("last_name"),
@@ -2550,14 +2601,35 @@ class Student(Page):
         FieldPanel("roll_no"),
         FieldPanel("enrollment_year"),
         FieldPanel("leaving_year"),
+        FieldPanel("is_exchange"),
+        AutocompletePanel("supervisor", target_model="mechweb.FacultyPage"),
+        AutocompletePanel("co_supervisor", target_model="mechweb.FacultyPage"),
+        InlinePanel(
+            "custom_supervisor",
+            max_num=2,
+            label="Supervisor/Co-supervisor/Faculty Advisor (Only if the supervisor/co-supervisor/faculty advisor is from other department)",
+        ),
+        FieldPanel("thesis_title"),
+        FieldPanel("hostel_address"),
+        MultiFieldPanel(
+            [
+                FieldPanel("contact_number"),
+                FieldPanel("website"),
+                FieldPanel("linkedin"),
+            ],
+            heading="Contact Information",
+            classname="collapsible",
+        ),
         ImageChooserPanel("photo"),
+        FieldPanel("intro"),
+        FieldPanel("body"),
     ]
 
     def __str__(self):
         name = self.first_name
-        if len(self.middle_name):
+        if self.middle_name and len(self.middle_name):
             name += " " + self.middle_name
-        if len(self.last_name):
+        if self.last_name and len(self.last_name):
             name += " " + self.last_name
         return name
 

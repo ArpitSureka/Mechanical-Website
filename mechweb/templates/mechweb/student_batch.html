@@ -202,7 +202,7 @@ opacity:0.8;
           <div class="col-7">
              
 	      {% comment %} <a href="{{ student.url }}"> {% endcomment %}
-              <a>
+              <a href="{{student.url}}">
                   <h3 class="text-info"> {{ student }}</h3>   
               </a>
               <ul class="bread-meta">
@@ -211,7 +211,7 @@ opacity:0.8;
                   {% endif %}
                     <li ><b >Email: </b>{{ student.specific.webmail|noscrape|safe}}</li>
                   {% if student.specific.roll_no %}
-                      <li ><b>Registration No.: </b>{{ student.specific.roll_no }}</li>
+                      <li ><b>Roll No.: </b>{{ student.specific.roll_no }}</li>
                   {% endif %}
 
                   {% if student.specific.supervisor %}
