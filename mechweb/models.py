@@ -2512,7 +2512,7 @@ class StudentBatch(Page):
                         student = Student(
                             title=row['Full Name'],         #Data from google form
                             webmail=row['IITG Email Id'],         #Data from google form
-                            first_name=row['First Name'] if row["First Name"] else None,        #Data from google form
+                            first_name=row['First Name'] if row ["First Name"] else None,        #Data from google form
                             middle_name=row['Middle Name'] if row["Middle Name"] else None,        #Data from google form
                             last_name=row['Last Name'] if row['Last Name'] else None,        #Data from google form
                             email_id=row['Personal mail Id'] if row["Personal mail Id"] else None,   #Data from google form
